@@ -2,7 +2,7 @@
 
 深度嵌入聚类 (DEC) 算法实现，详见 [dec.py](./dec.py)
 
-🚀 本仓库的亮点：
+🚀 本项目的工作包括：
 
 - [x] 用 DINOv2 模型生成图片 Embeddings
 - [x] 用 FastAPI 开发 DINOv2 批量推理服务，支持分 batch 和 模型结果归一化
