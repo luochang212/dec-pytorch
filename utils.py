@@ -16,6 +16,7 @@ from collections import Counter
 
 BATCH_SIZE = 8
 MAX_WORKERS = 2
+API_URL = "http://localhost:8210/embeddings/"
 
 
 def in_jupyter():
@@ -72,6 +73,16 @@ def read_embedding_csv(csv_path, ebd_cols: list):
     return df
 
 
+def preprocess_image(image):
+    # 若数据格式为 CHW（如 CIFAR-100），转为 HWC
+    if image.shape[0] in (1, 3):  # 灰度图或 RGB 图
+        image = image.transpose(1, 2, 0)
+    # 若数据被归一化到 [0, 1]，还原为 [0, 255]
+    if np.max(image) <= 1.0:
+        image = (image * 255).astype(np.uint8)
+    return image
+
+
 def to_base64(image):
     # 预处理图像
     image = preprocess_image(image)  
@@ -92,14 +103,14 @@ def split_list(lst, batch_size=BATCH_SIZE):
 def batch_processor(images, max_tries=2):
     base64_images = [to_base64(e) for e in images]
     for _ in range(max_tries):
-        response = utils.client(base64_images, api_url=API_URL)
+        response = client(base64_images, api_url=API_URL)
         if response.status_code == 200:
             embeddings = response.json().get('embeddings')
             if len(embeddings) != len(images):
                 print('Error: len(embeddings) != len(images)')
                 break
             return embeddings
-    return [None * len(images)]
+    return [None] * len(images)
 
 
 def gen_image_embed(images):
